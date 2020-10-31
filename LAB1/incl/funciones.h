@@ -6,5 +6,6 @@ void openFile(char *nameFile, int inicio, int lineas, int largoCadena, char *cad
 void writeFile(char *nombre, int *encontrado, int lineas);
 void readRP(char *nameFile, int *resultados, int lineaActual, int lineasLeer);
 void writeRF(char *nameFileInput, char *nameFileOutput, int numeroLineas, int *resultados, int flagD);
+int cadenaValida(char *cadena);
 
 #endif

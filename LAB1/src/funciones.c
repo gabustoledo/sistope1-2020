@@ -160,3 +160,18 @@ void writeRF(char *nameFileInput, char *nameFileOutput, int numeroLineas, int *r
 		fclose(archivoOutput);
 	}
 }
+
+/*
+ * Input: Cadena buscada.
+ * Output: 1->Correcto, 0->Invalido.
+ * Function: Compara cada caracter para encontrar un caracter no deseado.
+*/
+int cadenaValida(char *cadena){
+	for (int i = 0; i < strlen(cadena); i++){
+		if(cadena[i] != 'A' && cadena[i] != 'C' && cadena[i] != 'G' && cadena[i] != 'T'){
+			printf("\n\nCadena ingresada invalida.\n\n");
+			return 0;
+		}
+	}
+	return 1;
+}

@@ -22,18 +22,38 @@ int main(int argc, char **argv){
 		switch (c){
 		case 'i':
 			archivoEntrada = optarg;
+
+			// Se valida que el archivo ingresado si existe.
+			FILE *archivo;
+			archivo = fopen(archivoEntrada, "r");
+			if (archivo == NULL){
+				printf("\nError de apertura del archivo %s. \n\n", archivoEntrada);
+				exit(0);
+			}else
+				fclose(archivo);
+
 			break;
 
 		case 'n':
 			procesos = atof(optarg);
+			if(procesos <= 0){
+				printf("Numero de procesos ingresado es invalido.\n");
+				return 0;
+			}
 			break;
 
 		case 'c':
 			numeroLineas = atof(optarg);
+			if(numeroLineas <= 0){
+				printf("Numero de lineas ingresado es invalido.\n");
+				return 0;
+			}
 			break;
 
 		case 'p':
 			cadena = optarg;
+			if(cadenaValida(cadena) == 0)				
+				return 0;
 			break;
 
 		case 'd':
@@ -115,6 +135,8 @@ int main(int argc, char **argv){
 	char fileRP[50];
 	// Por cada proceso que fue creado.
 	for (int i = 0; i < procesos; i++){
+
+		// Se elige el id a revisar.
 		char idStr[10];
 		sprintf(idStr, "%d", i);
 
@@ -142,7 +164,7 @@ int main(int argc, char **argv){
 }
 
 /*
-  ./sucesion -i entrada.txt -n 5 -c 60 -p AAAA -d
+  ./sucesion -i entrada.txt -n 5 -c 20 -p AAAA -d
 */
 
 /*
