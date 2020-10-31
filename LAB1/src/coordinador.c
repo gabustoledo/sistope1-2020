@@ -8,115 +8,90 @@
 
 int main(int argc, char **argv){
 
-	char *archivoEntrada;
-	int procesos;
-	int numeroLineas;
-	char *cadena;
+	// Entradas principales
+	char *archivoEntrada = NULL;
+	int procesos = 0;
+	int numeroLineas = 0;
+	char *cadena = NULL;
 	int flagD = 0;
+
 	int c;
 	int lineasPorProceso = 0;
 	int *resultados;
+
+	if(argc < 9){
+		printf("Argumentos ingresados son insuficientes.\n");
+		return 0;
+	}
 
 	// Los argumentos de entrada son leidos y almacenados en su correspondinetes variables.
 	while (((c = getopt(argc, argv, "i:n:c:p:d")) != -1)){
 		switch (c){
 		case 'i':
 			archivoEntrada = optarg;
-
-			// Se valida que el archivo ingresado si existe.
-			FILE *archivo;
-			archivo = fopen(archivoEntrada, "r");
-			if (archivo == NULL){
-				printf("\nError de apertura del archivo %s. \n\n", archivoEntrada);
-				exit(0);
-			}else
-				fclose(archivo);
-
 			break;
-
 		case 'n':
 			procesos = atof(optarg);
-			if(procesos <= 0){
-				printf("Numero de procesos ingresado es invalido.\n");
-				return 0;
-			}
 			break;
-
 		case 'c':
 			numeroLineas = atof(optarg);
-			if(numeroLineas <= 0){
-				printf("Numero de lineas ingresado es invalido.\n");
-				return 0;
-			}
 			break;
-
 		case 'p':
 			cadena = optarg;
-			if(cadenaValida(cadena) == 0)				
-				return 0;
 			break;
-
 		case 'd':
 			flagD = 1;
 			break;
 		}
 	}
 
+	// Se validan las entradas ingresadas.
+	if(!validacionEntradas(archivoEntrada, procesos, numeroLineas, cadena))
+		return 0;
+
 	// Cantidad de lineas que debe leer cada proceso, suponiendo que siempre da un valor entero.
 	lineasPorProceso = numeroLineas / procesos;
 
-	// Contenido para funcion execv
-	char *path[7] = {"./comparador", "-i", "-n", "-c", "-p", "-d", NULL};
-
-	// Nombre de archivo para cada proceso
-	char envNombreArchivo[50];
-	strcpy(envNombreArchivo, "-i");
-	strcat(envNombreArchivo, archivoEntrada);
-	path[1] = envNombreArchivo;
-
-	// Lineas por proceso
-	char envLineas[50];
+	// Lineas por proceso a string para path
 	char lineasStr[10];
-	strcpy(envLineas, "-c");
 	sprintf(lineasStr, "%d", lineasPorProceso);
-	strcat(envLineas, lineasStr);
-	path[3] = envLineas;
 
-	// Cadena para cada proceso
-	char envCadena[50];
-	strcpy(envCadena, "-p");
-	strcat(envCadena, cadena);
-	path[4] = envCadena;
+	// Contenido para funcion execv
+	char *path[11] = {};
+	path[0] = "./comparador";
+	path[1] = "-i";
+	path[2] = archivoEntrada;
+	path[3] = "-n";
+	path[5] = "-c";
+	path[6] = lineasStr;
+	path[7] = "-p";
+	path[8] = cadena;
+	path[9] = "-d";
+	path[11] = NULL;
 
 	// Inicio para cada proceso
 	int inicioAux = 0;
-	char envInicio[50];
-	strcpy(envInicio, "-n");
-
-	// id para cada proceso
-	char envId[50];
-	strcpy(envId, "-d");
 
 	pid_t pid;
 	pid_t *pidarray = (pid_t *)malloc(sizeof(pid_t) * procesos);
-	for (int i = 0; i < procesos; i++){
-		if ((pid = fork()) == 0){
-			// Id para cada comparador
-			char idStr[10];
-			sprintf(idStr, "%d", i);
-			strcat(envId, idStr);
-			path[5] = envId;
 
+	for (int i = 0; i < procesos; i++){
+
+		if ((pid = fork()) == 0){
 			// Inicio para cada comparador
 			char inicioStr[10];
 			sprintf(inicioStr, "%d", inicioAux);
-			strcat(envInicio, inicioStr);
-			path[2] = envInicio;
+			path[4] = inicioStr;
+	
+			// Id para cada comparador
+			char idStr[10];
+			sprintf(idStr, "%d", i);
+			path[10] = idStr;
 
 			execv(path[0], path);
 		}
-		pidarray[i] = pid;
-		inicioAux += lineasPorProceso;
+		pidarray[i] = pid;               // Los pid son guardados para esperarlos en el futuro.
+		inicioAux += lineasPorProceso;   // La linea de inicio aumenta para cada proceso.
 	}
 
 	// Proceso padre espera a todos sus procesos hijos.

@@ -163,15 +163,40 @@ void writeRF(char *nameFileInput, char *nameFileOutput, int numeroLineas, int *r
 
 /*
  * Input: Cadena buscada.
- * Output: 1->Correcto, 0->Invalido.
+ * Output: TRUE o FALSE.
  * Function: Compara cada caracter para encontrar un caracter no deseado.
 */
 int cadenaValida(char *cadena){
 	for (int i = 0; i < strlen(cadena); i++){
-		if(cadena[i] != 'A' && cadena[i] != 'C' && cadena[i] != 'G' && cadena[i] != 'T'){
-			printf("\n\nCadena ingresada invalida.\n\n");
-			return 0;
-		}
+		if(cadena[i] != 'A' && cadena[i] != 'C' && cadena[i] != 'G' && cadena[i] != 'T')
+			return FALSE;
 	}
-	return 1;
+	return TRUE;
+}
+
+/*
+ * Input: Nombre del archivo.
+ * Output: TRUE o FALSE.
+ * Function: Comprueba que el archivo ingresado si exista.
+*/
+int archivoValido(char *nombreArchivo){
+	FILE *archivo;
+	archivo = fopen(nombreArchivo, "r");
+	if (archivo == NULL)
+		return FALSE;
+	else
+		fclose(archivo);
+	return TRUE;
+}
+
+/*
+ * Input: Nombre del archivo, cantidad de procesos, numero de lineas, cadena buscada.
+ * Output: TRUE o FALSE.
+ * Function: Comprueba que los argumentos ingresados sean validos.
+*/
+int validacionEntradas(char *nombreArchivo, int procesos, int lineas, char *cadena){
+	if(archivoValido(nombreArchivo) && cadenaValida(cadena) && procesos > 0 && lineas > 0)
+		return TRUE;
+	printf("\n\nEntradas invalidas, vuelva a intentar con valores correctos.\n\n");
+	return FALSE;
 }
