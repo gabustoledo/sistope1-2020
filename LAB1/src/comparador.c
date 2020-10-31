@@ -5,13 +5,16 @@
 #include "../incl/funciones.h"
 
 int main(int argc, char **argv){
+
+	// Argumentos de entrada.
 	char *archivoEntrada;
 	int inicio;
 	int numeroLineas;
 	char *cadena;
-	int largoCadena;
 	char *id;
+
 	int *encontrado;
+	int largoCadena;
 	char archivoSalida[100];
 	char *inicioStr;
 	int c;
@@ -22,22 +25,18 @@ int main(int argc, char **argv){
 		case 'i':
 			archivoEntrada = optarg;
 			break;
-
 		case 'n':
 			inicioStr = optarg;
 			inicio = atof(inicioStr);
 			break;
-
 		case 'c':
 			numeroLineas = atof(optarg);
 			encontrado = (int *)malloc(numeroLineas * sizeof(int));
 			break;
-
 		case 'p':
 			cadena = optarg;
 			largoCadena = strlen(cadena);
 			break;
-
 		case 'd':
 			id = optarg;
 			break;

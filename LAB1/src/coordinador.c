@@ -19,8 +19,9 @@ int main(int argc, char **argv){
 	int lineasPorProceso = 0;
 	int *resultados;
 
-	if(argc < 9){
-		printf("Argumentos ingresados son insuficientes.\n");
+	// Se comprueba que se ingresaron argumentos suficientes.
+	if(argc < 9 || argc > 10){
+		printf("\n\nArgumentos ingresados no son la cantidad adecuada.\n\n");
 		return 0;
 	}
 
@@ -56,7 +57,7 @@ int main(int argc, char **argv){
 	char lineasStr[10];
 	sprintf(lineasStr, "%d", lineasPorProceso);
 
-	// Contenido para funcion execv
+	// Contenido del path para funcion execv
 	char *path[11] = {};
 	path[0] = "./comparador";
 	path[1] = "-i";
@@ -72,6 +73,7 @@ int main(int argc, char **argv){
 	// Inicio para cada proceso
 	int inicioAux = 0;
 
+	// Pid y array de pid para guardar el id de cada proceso
 	pid_t pid;
 	pid_t *pidarray = (pid_t *)malloc(sizeof(pid_t) * procesos);
 
@@ -140,10 +142,4 @@ int main(int argc, char **argv){
 
 /*
   ./sucesion -i entrada.txt -n 5 -c 20 -p AAAA -d
-*/
-
-/*
-  al final hacer le modo debug
-
-	preguntar si es solo que sera para ver los resultados finales o para ver lo que va haciendo
 */

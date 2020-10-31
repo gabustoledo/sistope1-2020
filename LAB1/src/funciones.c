@@ -77,10 +77,6 @@ void writeFile(char *nombre, int *encontrado, int lineas){
 	}
 }
 
-//COMPARADOR
-//------------------
-// COORDINADOR
-
 /*
  * Input: Nombre del archivo, arreglo para almacenar los resultados, linea que sera leida, cantidad de lineas a leer.
  * Output: Vacio.
