@@ -44,9 +44,9 @@ int main(int argc, char **argv){
 	}
 
 	// Se lee el archivo de entrada y se hacen las comprobaciones si la cadena se encuentra.
-	openFile(archivoEntrada, inicio, numeroLineas, largoCadena, cadena, encontrado);
+	openFileRP(archivoEntrada, inicio, numeroLineas, largoCadena, cadena, encontrado);
 
-	//Es creado el nombre del archivo de salida.
+	// Es creado el nombre del archivo de salida.
 	strcpy(archivoSalida, "rp/rp_");
 	strcat(archivoSalida, cadena);
 	strcat(archivoSalida, "_");
@@ -54,7 +54,7 @@ int main(int argc, char **argv){
 	strcat(archivoSalida, ".txt");
 
 	// Se escribe el archivo se salida con los resultados parciales.
-	writeFile(archivoSalida, encontrado, numeroLineas);
+	writeFileRP(archivoSalida, archivoEntrada, encontrado, numeroLineas, inicio);
 
 	return 0;
 }

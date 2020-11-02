@@ -12,7 +12,6 @@
 */
 int detectar(char linea[], char *cadena, int largoCadena){
 	char *cadenaComp = (char *)malloc(largoCadena * sizeof(char));
-
 	for (int i = 0; i <= (strlen(linea) - largoCadena); i++){
 		for (int j = 0; j < largoCadena; j++){
 			cadenaComp[j] = linea[i + j];
@@ -30,10 +29,9 @@ int detectar(char linea[], char *cadena, int largoCadena){
  * Function: Avanza el puntero hasta la linea de partida, ahi comienza a leer la cantidad de lineas indicadas,
  *           cada linea es analizada con la funcion "detectar()", y su retorno es almacenado en "encontrado".
 */
-void openFile(char *nameFile, int inicio, int lineas, int largoCadena, char *cadena, int *encontrado){
+void openFileRP(char *nameFile, int inicio, int lineas, int largoCadena, char *cadena, int *encontrado){
 	FILE *archivo;
 	char buffer[200] = {};
-
 	archivo = fopen(nameFile, "r");
 
 	if (archivo == NULL){
@@ -50,110 +48,6 @@ void openFile(char *nameFile, int inicio, int lineas, int largoCadena, char *cad
 			encontrado[i - inicio] = detectar(buffer, cadena, largoCadena);
 		}
 		fclose(archivo);
-	}
-}
-
-/*
- * Input: Nombre del archivo, arreglo de enteros que indica si se ha encontrado o no la cadena en cada linea,
- *        cantidad de lineas que fueron leidas.
- * Output: Vacio.
- * Function: El contenido de "encontrado" es escrito en el archivo, son solo 0 y 1, que indican si se encontro
- *           la cadena en cada linea.
-*/
-void writeFile(char *nombre, int *encontrado, int lineas){
-	FILE *archivo;
-
-	archivo = fopen(nombre, "w+");
-
-	if (archivo == NULL){
-		printf("\nError de apertura del archivo escritura %s. \n\n", nombre);
-		exit(0);
-	}else{
-		for (int i = 0; i < lineas; i++){
-			fprintf(archivo, "%d", encontrado[i]);
-			fprintf(archivo, "%s", "\n");
-		}
-		fclose(archivo);
-	}
-}
-
-/*
- * Input: Nombre del archivo, arreglo para almacenar los resultados, linea que sera leida, cantidad de lineas a leer.
- * Output: Vacio.
- * Function: El contenido del archivo son 0 y 1, lo que indica si fue encontrada la cadena en ciertas lineas,
- *           el contenido del archivo el pasado completamente al arreglo "resultados" en las posiciones
- *           indicadas con "lineaActual".
-*/
-void readRP(char *nameFile, int *resultados, int lineaActual, int lineasLeer){
-
-	FILE *archivo;
-	char buffer[1];
-	char salto[1];
-	int result = 0;
-
-	archivo = fopen(nameFile, "r");
-
-	if (archivo == NULL){
-		printf("\nError de apertura del archivo lectura %s. \n\n", nameFile);
-		exit(0);
-	}
-	else{
-		// cada linea es leida, y su contenido es almacenado en "resultados".
-		for (int i = 0; i < lineasLeer; i++){
-			fread(buffer, sizeof(char), 1, archivo); // Contenido (0-1)
-			fread(salto, sizeof(char), 1, archivo);	 // Salto de linea
-
-			result = atof(buffer);
-			resultados[lineaActual + i] = result;
-		}
-		fclose(archivo);
-	}
-}
-
-/*
- * Input: Nombre del archivo de entrada, nombre del archivo a escribir los resultados,
- *        cantidad de lineas del archivo de entrada, arreglo con los resultados finales.
- * Output: Vacio.
- * Function: Lee cada linea del archivo de entrada, la copia directamente al archivo de salida,
- *           antes es pasar a leer la siguiente linea, comprueba el contenido de "resultados",
- *           si hay un 0 escribe un NO, si hay un 1 escribe un Si al final de la linea, y pasa
- *           a leer la siguiente linea.
-*/
-void writeRF(char *nameFileInput, char *nameFileOutput, int numeroLineas, int *resultados, int flagD){
-
-	FILE *archivoInput;
-	FILE *archivoOutput;
-	char buffer[200] = {};
-
-	archivoInput = fopen(nameFileInput, "r");
-	archivoOutput = fopen(nameFileOutput, "w+");
-
-	if (archivoInput == NULL || archivoOutput == NULL){
-		printf("\nError de apertura del archivo lectura y escritura %s %s. \n\n", nameFileInput, nameFileOutput);
-		exit(0);
-	}
-	else{
-		// Cada linea es leida y escrita en el archivo de salida, antes de pasar a la siguiente linea
-		// se comprueba el contenido de "resutlados" para poner Si o NO.
-		for (int i = 0; i < numeroLineas; i++){
-			fscanf(archivoInput, "%s", buffer);
-
-			fprintf(archivoOutput, "%s", buffer);
-			if (flagD == 1)
-				printf("%s", buffer);
-			if (resultados[i] == 0){
-				fprintf(archivoOutput, "%s", "    NO\n");
-				if (flagD == 1)
-					printf("    NO\n");
-			}else{
-				fprintf(archivoOutput, "%s", "    SI\n");
-				if (flagD == 1)
-					printf("    SI\n");
-			}
-		}
-
-		fclose(archivoInput);
-		fclose(archivoOutput);
 	}
 }
 
@@ -195,4 +89,95 @@ int validacionEntradas(char *nombreArchivo, int procesos, int lineas, char *cade
 		return TRUE;
 	printf("\n\nEntradas invalidas, vuelva a intentar con valores correctos.\n\n");
 	return FALSE;
+}
+
+/*
+ * Input: Nombre del archivo de escritura, nombre del archivo de entrada, arreglo de encontrados, cantidad de lineas, linea de inicio.
+ * Output: Vacio.
+ * Function: El contenido de "encontrado" es escrito en el archivo, con un SI o NO.
+*/
+void writeFileRP(char *nombreArchivoSalida, char *nombreArchivoEntrada, int *encontrado, int lineas, int lineaInicio){
+	FILE *archivoEntrada;
+	FILE *archivoSalida;
+	char buffer[200] = {};
+
+	archivoSalida = fopen(nombreArchivoSalida, "w+");
+	archivoEntrada = fopen(nombreArchivoEntrada, "r");
+
+	if (archivoSalida == NULL || archivoEntrada == NULL){
+		printf("\nError de apertura del archivo escritura %s. \n\n", nombreArchivoSalida);
+		exit(0);
+	}else{
+
+		for (int i = 0; i < lineaInicio; i++){
+			fscanf(archivoEntrada, "%s", buffer);
+		}
+
+		for (int i = 0; i < lineas; i++){
+			fscanf(archivoEntrada, "%s", buffer);
+			fprintf(archivoSalida, "%s", buffer);
+
+			if (encontrado[i] == 0)
+				fprintf(archivoSalida, "%s", "    NO\n");
+			else
+				fprintf(archivoSalida, "%s", "    SI\n");
+		}
+		fclose(archivoEntrada);
+		fclose(archivoSalida);
+		
+	}
+}
+
+/*
+ * Input: Nombre del archivo de salida, numero de lineas de archivo, bandera debug, cadena buscada, cantidad de procesos.
+ * Output: Vacio.
+ * Function: Lee cada archivo de respuesta parcial, y copia todo su contenido en el nuevo archivo, 
+ *           asi con todos los archivo parciales para formar el resultado completo.
+*/
+void writeFileRC(char *nameFileOutput, int numeroLineas, int flagD, char *cadena, int procesos){
+	FILE *archivoInput;
+	FILE *archivoOutput;
+	char buffer[200] = {};
+	char nombreArchivoEntrada[100];
+	char idStr[10];
+	int lineasPorProceso = numeroLineas/procesos;
+
+	archivoOutput = fopen(nameFileOutput, "w+");
+
+	if (archivoOutput == NULL){
+		printf("\nError de apertura del archivo lectura y escritura %s. \n\n", nameFileOutput);
+		exit(0);
+	}else{
+
+		for (int i = 0; i < procesos; i++){
+			
+			strcpy(nombreArchivoEntrada, "rp/rp_");
+			strcat(nombreArchivoEntrada, cadena);
+			strcat(nombreArchivoEntrada, "_");
+			sprintf(idStr, "%d", i);
+			strcat(nombreArchivoEntrada, idStr);
+			strcat(nombreArchivoEntrada, ".txt");
+
+			archivoInput = fopen(nombreArchivoEntrada, "r");
+
+			for (int j = 0; j < lineasPorProceso; j++){
+				// Caracteres del ADN
+				fscanf(archivoInput, "%s", buffer);
+				fprintf(archivoOutput, "%s", buffer);
+
+				if(flagD == 1)
+					printf("%s",buffer);
+
+				// Si o No
+				fscanf(archivoInput, "%s", buffer);
+				fprintf(archivoOutput, "    %s\n", buffer);	
+
+				if(flagD == 1)
+					printf("    %s\n",buffer);
+			}		
+
+			fclose(archivoInput);
+		}		
+		fclose(archivoOutput);
+	}
 }

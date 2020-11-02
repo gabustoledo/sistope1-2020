@@ -5,12 +5,11 @@
 #define FALSE 0
 
 int detectar(char linea[], char *cadena, int largoCadena);
-void openFile(char *nameFile, int inicio, int lineas, int largoCadena, char *cadena, int *encontrado);
-void writeFile(char *nombre, int *encontrado, int lineas);
-void readRP(char *nameFile, int *resultados, int lineaActual, int lineasLeer);
-void writeRF(char *nameFileInput, char *nameFileOutput, int numeroLineas, int *resultados, int flagD);
+void openFileRP(char *nameFile, int inicio, int lineas, int largoCadena, char *cadena, int *encontrado);
 int cadenaValida(char *cadena);
 int archivoValido(char *nombreArchivo);
 int validacionEntradas(char *nombreArchivo, int procesos, int lineas, char *cadena);
+void writeFileRP(char *archivoSalida, char *archivoEntrada, int *encontrado, int lineas, int lineaInicio);
+void writeFileRC(char *nameFileOutput, int numeroLineas, int flagD, char *cadena, int procesos);
 
 #endif

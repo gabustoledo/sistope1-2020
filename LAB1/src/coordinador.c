@@ -17,7 +17,6 @@ int main(int argc, char **argv){
 
 	int c;
 	int lineasPorProceso = 0;
-	int *resultados;
 
 	// Se comprueba que se ingresaron argumentos suficientes.
 	if(argc < 9 || argc > 10){
@@ -54,7 +53,7 @@ int main(int argc, char **argv){
 	lineasPorProceso = numeroLineas / procesos;
 
 	// Lineas por proceso a string para path
-	char lineasStr[10];
+	char lineasStr[50];
 	sprintf(lineasStr, "%d", lineasPorProceso);
 
 	// Contenido del path para funcion execv
@@ -81,7 +80,7 @@ int main(int argc, char **argv){
 
 		if ((pid = fork()) == 0){
 			// Inicio para cada comparador
-			char inicioStr[10];
+			char inicioStr[20];
 			sprintf(inicioStr, "%d", inicioAux);
 			path[4] = inicioStr;
 	
@@ -107,36 +106,15 @@ int main(int argc, char **argv){
 	if (flagD == 1)
 		printf("\n\n");
 
-	// Los resultados son leido en todos los archivos, y son escritos en "resultados".
-	resultados = (int *)malloc(sizeof(int) * numeroLineas);
-	char fileRP[50];
-	// Por cada proceso que fue creado.
-	for (int i = 0; i < procesos; i++){
-
-		// Se elige el id a revisar.
-		char idStr[10];
-		sprintf(idStr, "%d", i);
-
-		// Se genera el nombre de archivo que escribio cada proceso.
-		strcpy(fileRP, "rp/rp_");
-		strcat(fileRP, cadena);
-		strcat(fileRP, "_");
-		strcat(fileRP, idStr);
-		strcat(fileRP, ".txt");
-
-		// El archivo es leido, y su contenido queda en "resultados".
-		readRP(fileRP, resultados, i * lineasPorProceso, lineasPorProceso);
-	}
-
-	// Se genera el nombre de archivo para la salida.
-	char archivoSalida[100];
+	// Se crea el nombre del archivo de salida.
+	char archivoSalida[50];
 	strcpy(archivoSalida, "rc_");
 	strcat(archivoSalida, cadena);
 	strcat(archivoSalida, ".txt");
 
 	// El archivo de salida es escrito con el resultado encontrado.
-	writeRF(archivoEntrada, archivoSalida, numeroLineas, resultados, flagD);
-
+	writeFileRC(archivoSalida, numeroLineas, flagD, cadena, procesos);
+	
 	return 0;
 }
 
