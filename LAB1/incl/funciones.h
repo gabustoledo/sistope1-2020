@@ -10,6 +10,6 @@ int cadenaValida(char *cadena);
 int archivoValido(char *nombreArchivo);
 int validacionEntradas(char *nombreArchivo, int procesos, int lineas, char *cadena);
 void writeFileRP(char *archivoSalida, char archivoEntrada[], int *encontrado, int lineas, int lineaInicio);
-void writeFileRC(char *nameFileOutput, int numeroLineas, int flagD, char *cadena, int procesos);
+void writeFileRC(char *nameFileOutput, int numeroLineas, int flagD, char *cadena, int procesos, int *pidArray);
 
 #endif

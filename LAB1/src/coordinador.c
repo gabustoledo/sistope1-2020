@@ -68,7 +68,7 @@ int main(int argc, char **argv){
 	// Pid y array de pid para guardar el id de cada proceso
 	int status;
 	pid_t pid;
-	pid_t *pidarray = (pid_t *)malloc(sizeof(pid_t) * procesos);
+	pid_t *pidArray = (pid_t *)malloc(sizeof(pid_t) * procesos);
 
 	for (int i = 0; i < procesos; i++){
 
@@ -88,7 +88,7 @@ int main(int argc, char **argv){
 
 			// Id para el hijo
 			char idStr[10];
-			sprintf(idStr, "%d", i);
+			sprintf(idStr, "%d", pid);
 			
 			// Son escritos los parametros para el proceso hijo
 			write(pipes[ESCRITURA], archivoEntrada, 50*sizeof(char));
@@ -104,7 +104,7 @@ int main(int argc, char **argv){
 
 			execv(path[0], path);
 		}
-		pidarray[i] = pid;               // Los pid son guardados para esperarlos en el futuro.
+		pidArray[i] = pid;               // Los pid son guardados para esperarlos en el futuro.
 		inicioAux += lineasPorProceso;   // La linea de inicio aumenta para cada proceso.
 	}
 
@@ -112,9 +112,9 @@ int main(int argc, char **argv){
 	if (flagD == 1)
 		printf("\n\n");
 	for (int i = 0; i < procesos; i++){
-		waitpid(pidarray[i], &status, 0);
+		waitpid(pidArray[i], &status, 0);
 		if (flagD == 1)
-			printf("Proceso %d ha terminado su operacion\n", pidarray[i]);
+			printf("Proceso %d ha terminado su operacion\n", pidArray[i]);
 	}
 	if (flagD == 1)
 		printf("\n\n");
@@ -126,7 +126,7 @@ int main(int argc, char **argv){
 	strcat(archivoSalida, ".txt");
 
 	// El archivo de salida es escrito con el resultado encontrado.
-	writeFileRC(archivoSalida, numeroLineas, flagD, cadena, procesos);
+	writeFileRC(archivoSalida, numeroLineas, flagD, cadena, procesos, pidArray);
 
 	return 0;
 }

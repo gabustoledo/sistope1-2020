@@ -134,7 +134,7 @@ void writeFileRP(char *nombreArchivoSalida, char nombreArchivoEntrada[], int *en
  * Function: Lee cada archivo de respuesta parcial, y copia todo su contenido en el nuevo archivo, 
  *           asi con todos los archivo parciales para formar el resultado completo.
 */
-void writeFileRC(char *nameFileOutput, int numeroLineas, int flagD, char *cadena, int procesos){
+void writeFileRC(char *nameFileOutput, int numeroLineas, int flagD, char *cadena, int procesos, int *pidArray){
 	FILE *archivoInput;
 	FILE *archivoOutput;
 	char buffer[200] = {};
@@ -154,7 +154,7 @@ void writeFileRC(char *nameFileOutput, int numeroLineas, int flagD, char *cadena
 			strcpy(nombreArchivoEntrada, "rp/rp_");
 			strcat(nombreArchivoEntrada, cadena);
 			strcat(nombreArchivoEntrada, "_");
-			sprintf(idStr, "%d", i);
+			sprintf(idStr, "%d", pidArray[i]);
 			strcat(nombreArchivoEntrada, idStr);
 			strcat(nombreArchivoEntrada, ".txt");
 
