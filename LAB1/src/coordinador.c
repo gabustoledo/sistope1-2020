@@ -6,6 +6,9 @@
 #include <sys/wait.h>
 #include "../incl/funciones.h"
 
+#define LECTURA 0
+#define ESCRITURA 1
+
 int main(int argc, char **argv){
 
 	// Entradas principales
@@ -57,37 +60,47 @@ int main(int argc, char **argv){
 	sprintf(lineasStr, "%d", lineasPorProceso);
 
 	// Contenido del path para funcion execv
-	char *path[11] = {};
-	path[0] = "./comparador";
-	path[1] = "-i";
-	path[2] = archivoEntrada;
-	path[3] = "-n";
-	path[5] = "-c";
-	path[6] = lineasStr;
-	path[7] = "-p";
-	path[8] = cadena;
-	path[9] = "-d";
-	path[11] = NULL;
+	char *path[2] = {"./comparador", NULL};
 
 	// Inicio para cada proceso
 	int inicioAux = 0;
 
 	// Pid y array de pid para guardar el id de cada proceso
+	int status;
 	pid_t pid;
 	pid_t *pidarray = (pid_t *)malloc(sizeof(pid_t) * procesos);
 
 	for (int i = 0; i < procesos; i++){
 
-		if ((pid = fork()) == 0){
-			// Inicio para cada comparador
+		// Es creado el pipe de comunicacion
+		int *pipes = (int*)malloc(sizeof(int)*2);
+		pipe(pipes);
+
+		// Se crea el proceso hijo
+		pid = fork();
+
+		if(pid > 0){ // En caso de ser el padre, para escribir
+			close(pipes[LECTURA]); //El padre no va a leer, por lo tanto se cierra su descriptor
+
+			// Linea de inicio
 			char inicioStr[20];
 			sprintf(inicioStr, "%d", inicioAux);
-			path[4] = inicioStr;
-	
-			// Id para cada comparador
+
+			// Id para el hijo
 			char idStr[10];
 			sprintf(idStr, "%d", i);
-			path[10] = idStr;
+			
+			// Son escritos los parametros para el proceso hijo
+			write(pipes[ESCRITURA], archivoEntrada, 50*sizeof(char));
+			write(pipes[ESCRITURA], inicioStr, 20*sizeof(char));
+			write(pipes[ESCRITURA], lineasStr, 50*sizeof(char));
+			write(pipes[ESCRITURA], idStr, 10*sizeof(char));
+			write(pipes[ESCRITURA], cadena, 50*sizeof(char));
+
+		}else if (pid == 0){ // En caso de ser le hijo para ejecutar el comparador
+			
+			close(pipes[ESCRITURA]); //Como el hijo no va a escribir, cierra el descriptor de escritura
+			dup2(pipes[LECTURA], STDIN_FILENO);
 
 			execv(path[0], path);
 		}
@@ -99,7 +112,7 @@ int main(int argc, char **argv){
 	if (flagD == 1)
 		printf("\n\n");
 	for (int i = 0; i < procesos; i++){
-		waitpid(pidarray[i], 0, 0);
+		waitpid(pidarray[i], &status, 0);
 		if (flagD == 1)
 			printf("Proceso %d ha terminado su operacion\n", pidarray[i]);
 	}
@@ -114,7 +127,7 @@ int main(int argc, char **argv){
 
 	// El archivo de salida es escrito con el resultado encontrado.
 	writeFileRC(archivoSalida, numeroLineas, flagD, cadena, procesos);
-	
+
 	return 0;
 }
 

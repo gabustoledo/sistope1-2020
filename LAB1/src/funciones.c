@@ -29,7 +29,7 @@ int detectar(char linea[], char *cadena, int largoCadena){
  * Function: Avanza el puntero hasta la linea de partida, ahi comienza a leer la cantidad de lineas indicadas,
  *           cada linea es analizada con la funcion "detectar()", y su retorno es almacenado en "encontrado".
 */
-void openFileRP(char *nameFile, int inicio, int lineas, int largoCadena, char *cadena, int *encontrado){
+void openFileRP(char nameFile[], int inicio, int lineas, int largoCadena, char cadena[], int *encontrado){
 	FILE *archivo;
 	char buffer[200] = {};
 	archivo = fopen(nameFile, "r");
@@ -96,7 +96,7 @@ int validacionEntradas(char *nombreArchivo, int procesos, int lineas, char *cade
  * Output: Vacio.
  * Function: El contenido de "encontrado" es escrito en el archivo, con un SI o NO.
 */
-void writeFileRP(char *nombreArchivoSalida, char *nombreArchivoEntrada, int *encontrado, int lineas, int lineaInicio){
+void writeFileRP(char *nombreArchivoSalida, char nombreArchivoEntrada[], int *encontrado, int lineas, int lineaInicio){
 	FILE *archivoEntrada;
 	FILE *archivoSalida;
 	char buffer[200] = {};

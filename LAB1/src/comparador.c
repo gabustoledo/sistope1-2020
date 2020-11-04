@@ -1,47 +1,45 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "../incl/funciones.h"
+
+#define LECTURA 0
+#define ESCRITURA 1
 
 int main(int argc, char **argv){
 
 	// Argumentos de entrada.
-	char *archivoEntrada;
+	char archivoEntrada[50] = {};
 	int inicio;
 	int numeroLineas;
-	char *cadena;
-	char *id;
+	char cadena[50] = {};
+	char id[10] = {};
 
 	int *encontrado;
 	int largoCadena;
 	char archivoSalida[100];
-	char *inicioStr;
-	int c;
 
-	// Son obtenidos los argumentos de entrada.
-	while (((c = getopt(argc, argv, "i:n:c:p:d:")) != -1)){
-		switch (c){
-		case 'i':
-			archivoEntrada = optarg;
-			break;
-		case 'n':
-			inicioStr = optarg;
-			inicio = atof(inicioStr);
-			break;
-		case 'c':
-			numeroLineas = atof(optarg);
-			encontrado = (int *)malloc(numeroLineas * sizeof(int));
-			break;
-		case 'p':
-			cadena = optarg;
-			largoCadena = strlen(cadena);
-			break;
-		case 'd':
-			id = optarg;
-			break;
-		}
-	}
+	// Es leido lo que escribe el padre en el pipe
+	char leido[100];
+	read(STDIN_FILENO, leido, 50*sizeof(char));
+	strcpy(archivoEntrada, leido);
+
+	read(STDIN_FILENO, leido, 20*sizeof(char));
+	inicio = atof(leido);
+
+	read(STDIN_FILENO, leido, 50*sizeof(char));
+	numeroLineas = atof(leido);
+	encontrado = (int *)malloc(numeroLineas * sizeof(int));
+
+	read(STDIN_FILENO, leido, 10*sizeof(char));
+	strcpy(id, leido);
+
+	read(STDIN_FILENO, leido, 50*sizeof(char));
+	strcpy(cadena, leido);
+	largoCadena = strlen(cadena);
 
 	// Se lee el archivo de entrada y se hacen las comprobaciones si la cadena se encuentra.
 	openFileRP(archivoEntrada, inicio, numeroLineas, largoCadena, cadena, encontrado);
