@@ -55,7 +55,7 @@ int main(int argc, char **argv){
 	// Cantidad de lineas que debe leer cada proceso, suponiendo que siempre da un valor entero.
 	lineasPorProceso = numeroLineas / procesos;
 
-	// Lineas por proceso a string para path
+	// Lineas por proceso a string
 	char lineasStr[50];
 	sprintf(lineasStr, "%d", lineasPorProceso);
 
@@ -80,7 +80,7 @@ int main(int argc, char **argv){
 		pid = fork();
 
 		if(pid > 0){ // En caso de ser el padre, para escribir
-			close(pipes[LECTURA]); //El padre no va a leer, por lo tanto se cierra su descriptor
+			close(pipes[LECTURA]);   // El padre cierra el descriptor de lectura
 
 			// Linea de inicio
 			char inicioStr[20];
@@ -99,7 +99,7 @@ int main(int argc, char **argv){
 
 		}else if (pid == 0){ // En caso de ser le hijo para ejecutar el comparador
 			
-			close(pipes[ESCRITURA]); //Como el hijo no va a escribir, cierra el descriptor de escritura
+			close(pipes[ESCRITURA]);            // El hijo cierra el descriptor de escritura
 			dup2(pipes[LECTURA], STDIN_FILENO);
 
 			execv(path[0], path);

@@ -25,20 +25,20 @@ int main(int argc, char **argv){
 	// Es leido lo que escribe el padre en el pipe
 	char leido[100];
 	read(STDIN_FILENO, leido, 50*sizeof(char));
-	strcpy(archivoEntrada, leido);
+	strcpy(archivoEntrada, leido);  // Archivo de entrada
 
 	read(STDIN_FILENO, leido, 20*sizeof(char));
-	inicio = atof(leido);
+	inicio = atof(leido);           // Linea que debe comenzar a leer
 
 	read(STDIN_FILENO, leido, 50*sizeof(char));
-	numeroLineas = atof(leido);
+	numeroLineas = atof(leido);    // Cantidad de lineas a leer
 	encontrado = (int *)malloc(numeroLineas * sizeof(int));
 
 	read(STDIN_FILENO, leido, 10*sizeof(char));
-	strcpy(id, leido);
+	strcpy(id, leido);             // Id del proceso
 
 	read(STDIN_FILENO, leido, 50*sizeof(char));
-	strcpy(cadena, leido);
+	strcpy(cadena, leido);         // Cadena que debe buscar
 	largoCadena = strlen(cadena);
 
 	// Se lee el archivo de entrada y se hacen las comprobaciones si la cadena se encuentra.
