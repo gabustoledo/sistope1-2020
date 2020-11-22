@@ -19,4 +19,4 @@ $(OBJ_DIR)/hist.o: $(SRC_DIR)/hist.c
 
 .PHONY: clean
 clean:
-	@rm -rf $(OBJ_DIR) lab2
+	@rm -rf $(OBJ_DIR) lab2 histograma.txt

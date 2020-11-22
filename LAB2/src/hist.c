@@ -5,20 +5,16 @@
 #include <pthread.h>
 #include "../incl/funciones.h"
 
-
-
-
 int main(int argc, char **argv){
 
 	// Argumentos de entrada
 	char *imagenEntrada = NULL;
 	char *archivoSalida = NULL;
-	int niveles = 0;
-	int bins = 0;
 
-	// Variables para crear hebras
+	// Variables para crear hebra 0
 	pthread_t tid;
   pthread_attr_t attr;
+	struct thread_data thread_data_array;	
 
 	// Para leer argumentos de entrada
 	int c;
@@ -47,20 +43,47 @@ int main(int argc, char **argv){
 
 	argumentos(imagenEntrada, archivoSalida, nivelMax, bins);
 
-	if(!validacionEntradas(imagenEntrada, niveles, bins)){
+	if(!validacionEntradas(imagenEntrada, nivelMax, bins)){
 		printf("\nParametros ingresados no son validos.\n");
 		return 0;
 	}
 
-	printf("\nParametros validos.\n");
+	// Falta leer la imagen y dejarla de manera global
+	cabeceraIMG = lecturaCabecera(imagenEntrada);
 
-	// PRUEBAAAAAS
-	struct thread_data thread_data_array;
+	// Se reseva espacio para las matrices de RGB
+	memoriaRGB();
+
+	// El contenido de la imagen es leido
+	lecturaImagen(imagenEntrada);
+
+	for (int i = 0; i < 40; i++)
+	{
+		for (int j = 0; j < 40; j++)
+		{
+			printf("[%d]",B[i][j]);
+		}
+		printf("\n");
+	}
+	
+
+	printf("El ancho de la imagen es %d\n",cabeceraIMG.ancho);
+
+	// Respuesta del nivel 0
+	int *histograma = (int *) malloc (bins * sizeof(int));
+
+	// Creacion de la hebra de nivel 0 
 	thread_data_array.nivel = 0;
+	thread_data_array.i = 0;
+	thread_data_array.j = 0;
+	thread_data_array.ancho = cabeceraIMG.ancho;
 
 	pthread_attr_init(&attr);
-  pthread_create(&tid, &attr, prueba, (void *) &thread_data_array);
-  pthread_join(tid, NULL);
+  pthread_create(&tid, &attr, prueba, (void *) &thread_data_array);	
+  pthread_join(tid, (void *)&histograma);
+
+	// Se escribe la respuesta en el archivo
+	escrituraArchivo(archivoSalida, histograma);
 
 	return 0;
 }
