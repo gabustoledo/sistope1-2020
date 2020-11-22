@@ -7,7 +7,7 @@ OBJ_DIR=obj
 main: hist
 
 hist: $(OBJ_DIR)/hist.o $(OBJ_DIR)/funciones.o
-	@$(CC) $(CFLAGS) -o lab2 $(SRC_DIR)/hist.c $(OBJ_DIR)/funciones.o
+	@$(CC) $(CFLAGS) -pthread -o lab2 $(SRC_DIR)/hist.c $(OBJ_DIR)/funciones.o
 
 $(OBJ_DIR)/funciones.o: $(SRC_DIR)/funciones.c $(INCL_DIR)/funciones.h
 	@mkdir -p $(OBJ_DIR)

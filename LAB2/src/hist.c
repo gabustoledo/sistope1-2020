@@ -2,15 +2,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include "../incl/funciones.h"
+
+
+
 
 int main(int argc, char **argv){
 
+	// Argumentos de entrada
 	char *imagenEntrada = NULL;
 	char *archivoSalida = NULL;
 	int niveles = 0;
 	int bins = 0;
 
+	// Variables para crear hebras
+	pthread_t tid;
+  pthread_attr_t attr;
+
+	// Para leer argumentos de entrada
 	int c;
 
 	if(argc != 9){
@@ -27,7 +37,7 @@ int main(int argc, char **argv){
 			archivoSalida = optarg;
 			break;
 		case 'L':
-			niveles = atof(optarg);
+			nivelMax = atof(optarg);
 			break;
 		case 'B':
 			bins = atof(optarg);
@@ -35,7 +45,24 @@ int main(int argc, char **argv){
 		}
 	}
 
-	argumentos(imagenEntrada, archivoSalida, niveles, bins);
+	argumentos(imagenEntrada, archivoSalida, nivelMax, bins);
+
+	if(!validacionEntradas(imagenEntrada, niveles, bins)){
+		printf("\nParametros ingresados no son validos.\n");
+		return 0;
+	}
+
+	printf("\nParametros validos.\n");
+
+	// PRUEBAAAAAS
+	struct thread_data thread_data_array;
+	thread_data_array.nivel = 0;
+
+	pthread_attr_init(&attr);
+  pthread_create(&tid, &attr, prueba, (void *) &thread_data_array);
+  pthread_join(tid, NULL);
 
 	return 0;
 }
+
+// ./lab2 -i inputFiles/imagen_1.bmp -o histograma.txt -L 2 -B 256
