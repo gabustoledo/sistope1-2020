@@ -14,7 +14,7 @@ int main(int argc, char **argv){
 	// Variables para crear hebra 0
 	pthread_t tid;
   pthread_attr_t attr;
-	struct thread_data thread_data_array;	
+	struct thread_data thread_data_array;
 
 	// Para leer argumentos de entrada
 	int c;
@@ -57,18 +57,6 @@ int main(int argc, char **argv){
 	// El contenido de la imagen es leido
 	lecturaImagen(imagenEntrada);
 
-	for (int i = 0; i < 40; i++)
-	{
-		for (int j = 0; j < 40; j++)
-		{
-			printf("[%d]",B[i][j]);
-		}
-		printf("\n");
-	}
-	
-
-	printf("El ancho de la imagen es %d\n",cabeceraIMG.ancho);
-
 	// Respuesta del nivel 0
 	int *histograma = (int *) malloc (bins * sizeof(int));
 
@@ -79,7 +67,7 @@ int main(int argc, char **argv){
 	thread_data_array.ancho = cabeceraIMG.ancho;
 
 	pthread_attr_init(&attr);
-  pthread_create(&tid, &attr, prueba, (void *) &thread_data_array);	
+  pthread_create(&tid, &attr, principal, (void *) &thread_data_array);	
   pthread_join(tid, (void *)&histograma);
 
 	// Se escribe la respuesta en el archivo
