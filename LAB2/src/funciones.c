@@ -1,32 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <pthread.h>
 #include "../incl/funciones.h"
+// FALTA COMPROBAR QUE LA IMAGEN ES .BMP
+// Buscar donde liberar memoria para evitar el segmentation fault
 
-
-
-void argumentos(char *imagenEntrada, char *archivoSalida, int niveles, int bins){
-	printf("Archivo de entrada: %s\n", imagenEntrada);
-	printf("Archivo de salida: %s\n", archivoSalida);
-	printf("Cantidad de niveles: %d\n", niveles);
-	printf("Cantidad de bins: %d\n", bins);
-}
-
+/* Entrada: Nombre de la imagen, cantidad de niveles, cantidad de bins.
+ * Salida: TRUE -> 1, FALSE -> 0.
+ * Funcion: Valida que la imagen exista, comprueba si niveles esta en el rango deseado,
+ *          valida si el bins es potencia de 2.
+*/
 int validacionEntradas(char *imagenEntrada, int niveles, int bins){
 	if(imagenValida(imagenEntrada) && niveles >= 0 && niveles <= 8 && binValido(bins))
 		return TRUE;
 	return FALSE;
 }
 
-int imagenValida(char *imagenEntrada){	
-	FILE *img = fopen(imagenEntrada, "r");
-	if(!img)
-		return FALSE;
-	fclose(img);
-	return TRUE;
+/* Entrada: Nombre de la imagen.
+ * Salida: TRUE -> 1, FALSE -> 0.
+ * Funcion: Comprueba que la imagen exista, lo hace tratando de abrirla, si falla es FALSE, de lo contrario TRUE.
+*/
+int imagenValida(char *imagenEntrada){
+	if(esBMP(imagenEntrada)){
+		FILE *img = fopen(imagenEntrada, "r");
+		if(!img)
+			return FALSE;
+		fclose(img);
+		return TRUE;
+	}
+	return FALSE;
 }
 
+/* Entrada: Cantidad de bin.
+ * Salida: TRUE -> 1, FALSE -> 0.
+ * Funcion: Divide el numero para comprobar que es potencia de 2.
+*/
 int binValido(int bin){
 	int flag = TRUE;
 
@@ -44,8 +54,14 @@ int binValido(int bin){
 	return FALSE;
 }
 
+/* Entrada: Estructura para pasar informacion a hebra hija.
+ * Salida: Retorno a la hebra madre el histograma calculado.
+ * Funcion: Si el nivel de la hebra es menor al maximo, genera 4 hebras e indica la seccion de la imagen que deben leer,
+ *          las espera y suma las respuesta que le enviaron. Si la hebra es de nivel maximo, pasa a gris su parte de la imagen,
+ *          con esa respuesta calcula el histograma parcial y lo devuelve a la hebra madre.
+*/
 void *principal(void *input){
-	struct thread_data *myData = (struct thread_data *) input;
+	thread_data *myData = (thread_data *) input;
 	int nivelActual = myData->nivel;
 	int iActual = myData->i;
 	int jActual = myData->j;
@@ -54,28 +70,24 @@ void *principal(void *input){
 	if(nivelActual < nivelMax){ // Debe crear 4 hebras de un nivel mayor
 		pthread_t tid[4];
 		pthread_attr_t attr;
-		struct thread_data inputHebras[4];
+		thread_data inputHebras[4];
 
 		// Crear 4 hebras hijas
-		// struct thread_data hebra1;
 		inputHebras[0].nivel = nivelActual + 1;
 		inputHebras[0].i = iActual;
 		inputHebras[0].j = jActual;
 		inputHebras[0].ancho = anchoActual/2;
 
-		// struct thread_data hebra2;
 		inputHebras[1].nivel = nivelActual + 1;
 		inputHebras[1].i = iActual;
 		inputHebras[1].j = jActual + anchoActual/2;
 		inputHebras[1].ancho = anchoActual/2;
 
-		// struct thread_data hebra3;
 		inputHebras[2].nivel = nivelActual + 1;
 		inputHebras[2].i = iActual + anchoActual/2;
 		inputHebras[2].j = jActual;
 		inputHebras[2].ancho = anchoActual/2;
 
-		// struct thread_data hebra4;
 		inputHebras[3].nivel = nivelActual + 1;
 		inputHebras[3].i = iActual + anchoActual/2;
 		inputHebras[3].j = jActual + anchoActual/2;
@@ -98,24 +110,33 @@ void *principal(void *input){
 
 		// Sumas 4 arreglos devueltos
 		int *output = (int *) malloc (bins * sizeof(int));
-		for (int i = 0; i < bins; i++){
+		for (int i = 0; i < bins; i++)
 			output[i] = outputHebra1[i] + outputHebra2[i] + outputHebra3[i] + outputHebra4[i];
-		}	
+
+		free(outputHebra1);
+		free(outputHebra2);
+		free(outputHebra3);
+		free(outputHebra4);
 
 		// Retornar la suman de los arreglo
 		pthread_exit((void *)output);
 
 	}else if(nivelActual == nivelMax){ // Debe calcular el histograma y devolverlo a la hebra madre
+
 		// Pasar a gris parte de la imagen
 		int **gris = (int **) malloc (anchoActual * sizeof(int *));
 		for (int i=0 ; i < anchoActual ; i++)
-    	gris[i] = (int *) malloc (anchoActual * sizeof(int));
-		
+			gris[i] = (int *) malloc (anchoActual * sizeof(int));		
 		gris = RGBtoGris(iActual, jActual, anchoActual);
 
 		// Calcular histograma de esa parte
 		int *histo = (int *) malloc (bins * sizeof(int));
 		histo = calculoHistograma(gris, anchoActual);
+
+		// Se libera memoria de gris
+		for (int i=0 ; i < anchoActual ; i++)
+    	free(gris[i]);
+		free(gris);
 
 		// retornar arreglo de histograma
 		pthread_exit((void *)histo);
@@ -126,6 +147,10 @@ void *principal(void *input){
 	pthread_exit(0);
 }
 
+/* Entrada: Nombre de la imagen.
+ * Salida: Estructura con los datos de la cabecera de la imagen.
+ * Funcion: Abre la imagen, y comienza a leer cada dato de la cabecera, guardandolo en la estructura para la cabecera.
+*/
 cabeceraBMP lecturaCabecera(char *nombre){
 
 	FILE *archivo = fopen(nombre, "r");
@@ -157,6 +182,10 @@ cabeceraBMP lecturaCabecera(char *nombre){
 	return cabecera;
 }
 
+/* Entrada:
+ * Salida:
+ * Funcion: Reserva memoria para la matrices globales de RGB, segun el ancho de la imagen en la cabecera.
+*/
 void memoriaRGB(){
 	R = (int **) malloc (cabeceraIMG.ancho * sizeof(int *));
 	G = (int **) malloc (cabeceraIMG.ancho * sizeof(int *));
@@ -169,6 +198,11 @@ void memoriaRGB(){
   }
 }
 
+/* Entrada: Nombre de la imagen.
+ * Salida: 
+ * Funcion: Abre la imagen, posiciona el cursor en el inicio de los datos de la imagen, 
+ *          cada bytes leido es asignado a su matriz en el orden BGR.
+*/
 void lecturaImagen(char *nombre){
 
 	FILE *archivo = fopen(nombre, "r");
@@ -190,9 +224,14 @@ void lecturaImagen(char *nombre){
 	fclose(archivo);
 }
 
+/* Entrada: Nombre del archivo de salida, arreglo con los resultados del histograma.
+ * Salida:
+ * Funcion: Abre o crea el archivo de salida, por cada elemento del histograma, lo escribe en el archivo,
+ *          mientras el rango va variando segun los bins deseados.
+*/
 void escrituraArchivo(char *nombre, int *histograma){
 	FILE *archivo = fopen(nombre, "w");
-	int update = 256/bins;
+	int rango = 256/bins;
 
 	if(!archivo){
 		printf("No se pudo crear el archivo de salido %s.\n",nombre);
@@ -200,13 +239,18 @@ void escrituraArchivo(char *nombre, int *histograma){
 	}
 
 	int j = 0;
-	for (int i = 0; i < 256; i+=update){
-		fprintf(archivo,"[%d,\t%d]\t%d\n",i,i+update-1,histograma[j]);
+	for (int i = 0; i < 256; i+=rango){
+		fprintf(archivo,"[%d,\t%d]\t%d\n",i,i+rango-1,histograma[j]);
 		j++;
 	}		
 	fclose(archivo);
 }
 
+/* Entrada: I inicial, J inicial, ancho de la seccion.
+ * Salida: Matriz con los valores de la imagen en gris.
+ * Funcion: Crea una matriz del ancho indicado, para cada elemento de esta matriz calcula el valor
+ *          gris segun lo que contengan las matrices RGB.
+*/
 int **RGBtoGris(int iActual, int jActual, int ancho){
 	int **gris = (int **) malloc (ancho * sizeof(int *));
 	for (int i=0 ; i < ancho ; i++)
@@ -225,6 +269,12 @@ int **RGBtoGris(int iActual, int jActual, int ancho){
 	return gris;
 }
 
+/* Entrada: Seccion de la imagen en gris, ancho de la imagen.
+ * Salida: Arreglo con el histograma calculado segun la cantidad de bins.
+ * Funcion: Para cada rango segun los bins, comprueba en todos los elementos de la imagen
+ *          si el valor leido se encuentra en el rango buscado, de ser ciero le suma uno a esa
+ *          posicion del histograma.
+*/
 int *calculoHistograma(int **img, int ancho){
 	int *histo = (int *) malloc (bins * sizeof(int));
 	int rango = 256/bins;
@@ -244,4 +294,16 @@ int *calculoHistograma(int **img, int ancho){
 	}
 	
 	return histo;
+}
+
+/* Entrada: Nombre del archivo de la imagen.
+ * Salida: TRUE -> 1, FALSE -> 0.
+ * Funcion: Comprueba que la parte final del string sea ".bmp", para evitar que se entre otro tipo de archivo.
+*/
+int esBMP(char *nombre){
+	int largo = strlen(nombre);
+	if(nombre[largo-4]=='.' && nombre[largo-3]=='b' && nombre[largo-2]=='m' && nombre[largo-1]=='p'){
+		return TRUE;
+	}
+	return FALSE;
 }

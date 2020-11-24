@@ -14,7 +14,7 @@ int main(int argc, char **argv){
 	// Variables para crear hebra 0
 	pthread_t tid;
   pthread_attr_t attr;
-	struct thread_data thread_data_array;
+	thread_data thread_data_array;
 
 	// Para leer argumentos de entrada
 	int c;
@@ -41,13 +41,11 @@ int main(int argc, char **argv){
 		}
 	}
 
-	argumentos(imagenEntrada, archivoSalida, nivelMax, bins);
-
 	if(!validacionEntradas(imagenEntrada, nivelMax, bins)){
 		printf("\nParametros ingresados no son validos.\n");
 		return 0;
 	}
-
+	
 	// Falta leer la imagen y dejarla de manera global
 	cabeceraIMG = lecturaCabecera(imagenEntrada);
 

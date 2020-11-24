@@ -4,12 +4,12 @@
 #define TRUE 1
 #define FALSE 0
 
-struct thread_data{
+typedef struct thread_data{
   int	nivel;  // Nivel actual de la hebra
   int i;      // Posicion i donde debe comenzar a leer
   int j;      // Posicion j donde cebe comenzar a leer
   int ancho;      // Ancho de la porcion de la imagen que debe leer
-};
+}thread_data;
 
 typedef struct cabeceraBMP{
   char bm[2]; //(2 Bytes) BM (Tipo de archivo)
@@ -36,7 +36,6 @@ int **B;
 int **G;
 int **R;
 
-void argumentos(char *imagenEntrada, char *archivoSalida, int niveles, int bins); // *********
 int validacionEntradas(char *imagenEntrada, int niveles, int bins);
 int imagenValida(char *imagenEntrada);
 int binValido(int bin);
@@ -47,5 +46,6 @@ void lecturaImagen(char *nombre);
 void escrituraArchivo(char *nombre, int *histograma);
 int **RGBtoGris(int iActual, int jActual, int ancho);
 int *calculoHistograma(int **img, int ancho);
+int esBMP(char *nombre);
 
 #endif
