@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <pthread.h>
 #include "../incl/funciones.h"
-// FALTA COMPROBAR QUE LA IMAGEN ES .BMP
-// Buscar donde liberar memoria para evitar el segmentation fault
+#include "../incl/globales.h"
+#include "../incl/estructuras.h"
 
 /* Entrada: Nombre de la imagen, cantidad de niveles, cantidad de bins.
  * Salida: TRUE -> 1, FALSE -> 0.
@@ -72,7 +72,7 @@ void *principal(void *input){
 		pthread_attr_t attr;
 		thread_data inputHebras[4];
 
-		// Crear 4 hebras hijas
+		// Crear 4 input para hebras hijas
 		inputHebras[0].nivel = nivelActual + 1;
 		inputHebras[0].i = iActual;
 		inputHebras[0].j = jActual;
@@ -93,26 +93,29 @@ void *principal(void *input){
 		inputHebras[3].j = jActual + anchoActual/2;
 		inputHebras[3].ancho = anchoActual/2;
 
+		// Se crean las 4 hebras con su respectivo input
 		pthread_attr_init(&attr);
 		for (int i = 0; i < 4; i++)
 			pthread_create(&(tid[i]), &attr, principal, (void *) &inputHebras[i]);
 
-		// Esperar 4 hebras hijas
+		// Se reserva memoria para la respuesta de las hebras
 		int *outputHebra1 = (int *) malloc (bins * sizeof(int));
 		int *outputHebra2 = (int *) malloc (bins * sizeof(int));
 		int *outputHebra3 = (int *) malloc (bins * sizeof(int));
 		int *outputHebra4 = (int *) malloc (bins * sizeof(int));
 
+		// Se esperan las 4 hebras
 		pthread_join(tid[0], (void *)&outputHebra1);
 		pthread_join(tid[1], (void *)&outputHebra2);
 		pthread_join(tid[2], (void *)&outputHebra3);
 		pthread_join(tid[3], (void *)&outputHebra4);
 
-		// Sumas 4 arreglos devueltos
+		// Se suma los 4 resultados recibidos
 		int *output = (int *) malloc (bins * sizeof(int));
 		for (int i = 0; i < bins; i++)
 			output[i] = outputHebra1[i] + outputHebra2[i] + outputHebra3[i] + outputHebra4[i];
 
+		// Liberacion de memoria del output de las hebras.
 		free(outputHebra1);
 		free(outputHebra2);
 		free(outputHebra3);
@@ -161,6 +164,7 @@ cabeceraBMP lecturaCabecera(char *nombre){
 		exit(0);
 	}
 
+	// Cada elemento de la cabcera de la imagen es leido.
 	fseek(archivo,0, SEEK_SET);
 	fread(&cabecera.bm,sizeof(char),2,archivo);
 	fread(&cabecera.tamano,sizeof(int),1,archivo);
@@ -212,6 +216,7 @@ void lecturaImagen(char *nombre){
 		exit(0);
 	}
 
+	// Se avanza hasta donde comienzan los datos de los pixeles.
 	fseek(archivo, cabeceraIMG.offset, SEEK_SET);
 	for (int i = 0; i < cabeceraIMG.ancho; i++){
 		for (int j = 0; j < cabeceraIMG.ancho; j++){
@@ -242,7 +247,7 @@ void escrituraArchivo(char *nombre, int *histograma){
 	for (int i = 0; i < 256; i+=rango){
 		fprintf(archivo,"[%d,\t%d]\t%d\n",i,i+rango-1,histograma[j]);
 		j++;
-	}		
+	}
 	fclose(archivo);
 }
 
@@ -260,6 +265,7 @@ int **RGBtoGris(int iActual, int jActual, int ancho){
 	int k = 0;
 	for (int i = iActual; i < iActual+ancho; i++){
 		for (int j = jActual; j < jActual+ancho; j++){
+			// Se utiliza la formula proporcionada
 			gris[l][k] = R[i][j]*0.3 + G[i][j]*0.59 + B[i][j]*0.11;
 			k++;
 		}

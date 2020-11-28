@@ -4,6 +4,8 @@
 #include <string.h>
 #include <pthread.h>
 #include "../incl/funciones.h"
+#include "../incl/globales.h"
+#include "../incl/estructuras.h"
 
 int main(int argc, char **argv){
 
